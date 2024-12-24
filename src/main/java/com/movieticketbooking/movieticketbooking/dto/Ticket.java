@@ -14,4 +14,5 @@ public class Ticket {
   private double unitPrice;
   private int noOfTickets;
   private double price;
+  private String title;
 }

@@ -2,40 +2,41 @@ package com.movieticketbooking.movieticketbooking.service;
 
 import com.movieticketbooking.movieticketbooking.dto.Movie;
 import com.movieticketbooking.movieticketbooking.entity.MovieEntity;
+import com.movieticketbooking.movieticketbooking.exception.InputMisMatchException;
+import com.movieticketbooking.movieticketbooking.exception.InvalidMovieIdException;
 import com.movieticketbooking.movieticketbooking.repository.MovieRepository;
+import com.movieticketbooking.movieticketbooking.util.MovieTicketMockData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
+import static com.movieticketbooking.movieticketbooking.util.MovieTicketMockData.toMovie;
+
 @Service
-public class MovieServiceImpl implements MovieService{
+public class MovieServiceImpl implements MovieService {
 
   @Autowired
   private MovieRepository movieRepository;
 
   @Override
   public Movie createMovie(Movie movie) {
-    MovieEntity movieEntity= toMovieEntity(movie);
-    movieEntity=movieRepository.save(movieEntity);
+    MovieEntity movieEntity = MovieTicketMockData.toMovieEntity(movie);
+    movieEntity = movieRepository.save(movieEntity);
     return toMovie(movieEntity);
   }
 
-  private MovieEntity toMovieEntity(Movie movie) {
-    MovieEntity movieEntity=new MovieEntity();
-    movieEntity.setId(movie.getId());
-    movieEntity.setTitle(movie.getTitle());
-    movieEntity.setDirector(movie.getDirector());
-    movieEntity.setLanguage(movie.getLanguage());
-    movieEntity.setYear(movie.getYear());
-    return movieEntity;
+  @Override
+  public Movie getMovieDetails(Long movieId) {
+    Optional<MovieEntity> movie = movieRepository.findById(movieId);
+    if (movieId < 1) {
+      throw new InputMisMatchException("Movie id cannot be negative");
+    }
+    if (movie.isEmpty()) {
+      throw new InvalidMovieIdException("Invalid movie id: " + movieId);
+    }
+    return toMovie(movie.get());
   }
 
-  private Movie toMovie(MovieEntity movieEntity) {
-    Movie movie=new Movie();
-    movie.setId(movieEntity.getId());
-    movie.setTitle(movieEntity.getTitle());
-    movie.setDirector(movieEntity.getDirector());
-    movie.setLanguage(movieEntity.getLanguage());
-    movie.setYear(movieEntity.getYear());
-    return movie;
-  }
+
 }
